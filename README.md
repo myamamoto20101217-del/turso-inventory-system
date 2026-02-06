@@ -6,7 +6,7 @@ GASの遅さを完全に解消する、モダンな在庫管理システム
 
 | 技術 | 用途 | 特徴 |
 |------|------|------|
-| **Bun** | Runtime | Node.jsの3-4倍高速 |
+| **Bun** | Runtime | Node.jsの3-4倍高速・ホットリロード |
 | **Hono** | Web Framework | 超軽量・高速 (Cloudflare Pages) |
 | **Turso** | Database | エッジDB・低レイテンシー |
 | **Drizzle ORM** | ORM | 型安全・高速 |
@@ -14,6 +14,120 @@ GASの遅さを完全に解消する、モダンな在庫管理システム
 | **Vite** | Bundler | 爆速HMR |
 | **Firebase Auth** | 認証 | Google認証対応 |
 | **TypeScript** | 言語 | 完全型安全 |
+| **ESLint** | Linter | コード品質管理 |
+| **Prettier** | Formatter | コード整形 |
+| **Husky** | Git Hooks | コミット前チェック |
+
+## 🎯 主要機能
+
+- 📦 **在庫管理**: リアルタイム在庫追跡・低在庫アラート
+- 📖 **レシピ管理**: メニューと材料の関連管理
+- 📊 **売上分析**: 店舗別・メニュー別集計とグラフ
+- 🛒 **仕入れ管理**: 仕入れデータ登録・集計
+- 🗑️ **廃棄管理**: 廃棄理由別集計
+- 🔐 **認証**: Firebase Authentication統合
+
+## 🚀 クイックスタート
+
+### 1. 依存関係のインストール
+
+```bash
+bun install
+```
+
+### 2. データベースセットアップ
+
+```bash
+# マイグレーション実行
+bun run db:migrate
+
+# サンプルデータ投入
+bun run db:seed
+```
+
+### 3. 開発サーバー起動
+
+#### 方法1: 両方同時起動（推奨）
+```powershell
+.\dev.ps1
+```
+
+#### 方法2: 個別起動
+```bash
+# APIサーバー（ターミナル1）
+bun run dev:api
+
+# フロントエンド（ターミナル2）
+bun run dev:frontend
+```
+
+### 4. アクセス
+
+- **API**: http://localhost:3000
+- **Frontend**: http://localhost:5173 (または 5174)
+
+## 📝 開発コマンド
+
+### コード品質管理
+
+```bash
+# Lint実行
+bun run lint
+
+# Lint自動修正
+bun run lint:fix
+
+# フォーマット実行
+bun run format
+
+# フォーマットチェック
+bun run format:check
+```
+
+### データベース
+
+```bash
+# スキーマ変更を反映
+bun run db:generate
+
+# マイグレーション実行
+bun run db:migrate
+
+# Drizzle Studio起動
+bun run db:studio
+
+# サンプルデータ再投入
+bun run db:seed
+```
+
+### Git
+
+```bash
+# コミット時に自動的にlint-stagedが実行されます
+git add .
+git commit -m "feat: 新機能追加"
+```
+
+## 🎨 Bunの便利機能
+
+### ホットリロード
+```bash
+# --hotフラグでファイル変更時に自動再起動
+bun --hot src/index.ts
+```
+
+### 環境変数の自動読み込み
+```bash
+# .dev.varsファイルを自動読み込み
+bun --env-file=.dev.vars src/index.ts
+```
+
+### 高速パッケージ管理
+```bash
+# npm/yarnより遥かに高速
+bun add <package>
+bun remove <package>
+```
 
 ## 📦 プロジェクト構成
 
