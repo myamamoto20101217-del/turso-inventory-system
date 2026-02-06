@@ -8,6 +8,9 @@ import recipesRoutes from './routes/recipes';
 import menusRoutes from './routes/menus';
 import purchasesRoutes from './routes/purchases';
 import wasteRoutes from './routes/waste';
+import stocktakingsRoutes from './routes/stocktakings';
+import ordersRoutes from './routes/orders';
+import wipProductionsRoutes from './routes/wip-productions';
 
 // Cloudflare Pages環境変数の型定義
 type Bindings = {
@@ -63,6 +66,9 @@ app.route('/api/recipes', recipesRoutes);
 app.route('/api/menus', menusRoutes);
 app.route('/api/purchases', purchasesRoutes);
 app.route('/api/waste', wasteRoutes);
+app.route('/api/stocktakings', stocktakingsRoutes);
+app.route('/api/orders', ordersRoutes);
+app.route('/api/wip-productions', wipProductionsRoutes);
 
 // 404 Handler
 app.notFound((c) => {

@@ -6,6 +6,8 @@ import RecipeList from './RecipeList';
 import SalesAnalytics from './SalesAnalytics';
 import PurchaseList from './PurchaseList';
 import WasteList from './WasteList';
+import StocktakingList from './StocktakingList';
+import OrderList from './OrderList';
 
 interface SalesSummary {
   totalSales: number;
@@ -14,7 +16,7 @@ interface SalesSummary {
   averageOrderValue: number;
 }
 
-type TabType = 'inventory' | 'recipes' | 'sales' | 'purchases' | 'waste';
+type TabType = 'inventory' | 'recipes' | 'sales' | 'purchases' | 'waste' | 'stocktaking' | 'orders';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('inventory');
@@ -52,6 +54,8 @@ export default function Dashboard() {
     { id: 'sales' as TabType, label: '📊 売上分析', icon: '📊' },
     { id: 'purchases' as TabType, label: '🛒 仕入れ', icon: '🛒' },
     { id: 'waste' as TabType, label: '🗑️ 廃棄', icon: '🗑️' },
+    { id: 'stocktaking' as TabType, label: '📋 棚卸', icon: '📋' },
+    { id: 'orders' as TabType, label: '📝 発注', icon: '📝' },
   ];
 
   return (
@@ -100,6 +104,8 @@ export default function Dashboard() {
         {activeTab === 'sales' && <SalesAnalytics />}
         {activeTab === 'purchases' && <PurchaseList />}
         {activeTab === 'waste' && <WasteList />}
+        {activeTab === 'stocktaking' && <StocktakingList />}
+        {activeTab === 'orders' && <OrderList />}
       </div>
     </div>
   );
