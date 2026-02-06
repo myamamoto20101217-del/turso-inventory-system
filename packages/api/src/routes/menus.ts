@@ -17,7 +17,6 @@ app.get('/', async (c) => {
       categoryId: menus.categoryId,
       categoryName: categories.name,
       price: menus.price,
-      description: menus.description,
       isActive: menus.isActive,
     })
     .from(menus)

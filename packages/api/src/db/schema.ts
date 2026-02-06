@@ -237,6 +237,126 @@ export const waste = sqliteTable('waste', {
     .default(sql`(unixepoch())`),
 });
 
+/**
+ * 棚卸ヘッダー
+ */
+export const stocktakings = sqliteTable('stocktakings', {
+  id: text('id').primaryKey(),
+  storeId: text('store_id')
+    .notNull()
+    .references(() => stores.id),
+  stocktakingDate: integer('stocktaking_date', { mode: 'timestamp' }).notNull(),
+  status: text('status', { enum: ['DRAFT', 'CONFIRMED'] })
+    .notNull()
+    .default('DRAFT'),
+  employeeId: text('employee_id').references(() => users.id),
+  confirmedAt: integer('confirmed_at', { mode: 'timestamp' }),
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+/**
+ * 棚卸明細
+ */
+export const stocktakingDetails = sqliteTable('stocktaking_details', {
+  id: text('id').primaryKey(),
+  stocktakingId: text('stocktaking_id')
+    .notNull()
+    .references(() => stocktakings.id),
+  productId: text('product_id').references(() => products.id),
+  wipItemId: text('wip_item_id').references(() => wipItems.id),
+  systemQuantity: real('system_quantity').notNull(), // 理論在庫
+  actualQuantity: real('actual_quantity').notNull(), // 実在庫
+  difference: real('difference').notNull(), // 差異
+  unit: text('unit').notNull(),
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+/**
+ * 発注ヘッダー
+ */
+export const orders = sqliteTable('orders', {
+  id: text('id').primaryKey(),
+  orderNumber: text('order_number').notNull().unique(), // 表示用発注番号
+  storeId: text('store_id')
+    .notNull()
+    .references(() => stores.id),
+  supplierId: text('supplier_id'),
+  orderDate: integer('order_date', { mode: 'timestamp' }).notNull(),
+  expectedDeliveryDate: integer('expected_delivery_date', { mode: 'timestamp' }),
+  actualDeliveryDate: integer('actual_delivery_date', { mode: 'timestamp' }),
+  status: text('status', {
+    enum: ['DRAFT', 'ORDERED', 'DELIVERED', 'CANCELLED'],
+  })
+    .notNull()
+    .default('DRAFT'),
+  isAutoOrder: integer('is_auto_order', { mode: 'boolean' }).notNull().default(false),
+  employeeId: text('employee_id').references(() => users.id),
+  totalAmount: real('total_amount').notNull().default(0),
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+/**
+ * 発注明細
+ */
+export const orderDetails = sqliteTable('order_details', {
+  id: text('id').primaryKey(),
+  orderId: text('order_id')
+    .notNull()
+    .references(() => orders.id),
+  productId: text('product_id')
+    .notNull()
+    .references(() => products.id),
+  quantity: real('quantity').notNull(),
+  unit: text('unit').notNull(),
+  unitPrice: real('unit_price').notNull(),
+  amount: real('amount').notNull(), // quantity × unitPrice
+  receivedQuantity: real('received_quantity').default(0), // 実際の納品数量
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+/**
+ * 仕掛品製造データ
+ */
+export const wipProductions = sqliteTable('wip_productions', {
+  id: text('id').primaryKey(),
+  storeId: text('store_id')
+    .notNull()
+    .references(() => stores.id),
+  wipItemId: text('wip_item_id')
+    .notNull()
+    .references(() => wipItems.id),
+  quantity: real('quantity').notNull(),
+  unit: text('unit').notNull(),
+  productionDate: integer('production_date', { mode: 'timestamp' }).notNull(),
+  expiryDate: integer('expiry_date', { mode: 'timestamp' }),
+  employeeId: text('employee_id').references(() => users.id),
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // 型エクスポート
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -244,3 +364,13 @@ export type Store = typeof stores.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type Inventory = typeof inventory.$inferSelect;
 export type Sale = typeof sales.$inferSelect;
+export type Stocktaking = typeof stocktakings.$inferSelect;
+export type NewStocktaking = typeof stocktakings.$inferInsert;
+export type StocktakingDetail = typeof stocktakingDetails.$inferSelect;
+export type NewStocktakingDetail = typeof stocktakingDetails.$inferInsert;
+export type Order = typeof orders.$inferSelect;
+export type NewOrder = typeof orders.$inferInsert;
+export type OrderDetail = typeof orderDetails.$inferSelect;
+export type NewOrderDetail = typeof orderDetails.$inferInsert;
+export type WipProduction = typeof wipProductions.$inferSelect;
+export type NewWipProduction = typeof wipProductions.$inferInsert;

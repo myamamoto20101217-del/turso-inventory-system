@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { ulid } from 'ulid';
 import { createDbClient } from '../db/client';
 import { recipes, menus, products, wipItems } from '../db/schema';
 import { eq } from 'drizzle-orm';
@@ -52,6 +53,70 @@ app.get('/menu/:menuId', async (c) => {
     .where(eq(recipes.menuId, menuId));
 
   return c.json({ success: true, data: recipeList });
+});
+
+// レシピ作成
+app.post('/', async (c) => {
+  const db = createDbClient(c.env);
+  const { menuId, ingredients } = await c.req.json<{
+    menuId: string;
+    ingredients: Array<{
+      productId: string;
+      quantity: number;
+      unit: string;
+    }>;
+  }>();
+
+  // 各材料をレシピに追加
+  for (const ingredient of ingredients) {
+    await db.insert(recipes).values({
+      id: ulid(),
+      menuId,
+      productId: ingredient.productId,
+      quantity: ingredient.quantity,
+      unit: ingredient.unit,
+    });
+  }
+
+  return c.json({ success: true, message: 'レシピを作成しました' });
+});
+
+// 仕掛品レシピ作成
+app.post('/wip', async (c) => {
+  const db = createDbClient(c.env);
+  const { wipItemId, ingredients } = await c.req.json<{
+    wipItemId: string;
+    ingredients: Array<{
+      productId?: string;
+      usedWipItemId?: string;
+      quantity: number;
+      unit: string;
+    }>;
+  }>();
+
+  // 各材料を仕掛品レシピに追加
+  for (const ingredient of ingredients) {
+    await db.insert(recipes).values({
+      id: ulid(),
+      wipItemId,
+      productId: ingredient.productId || null,
+      usedWipItemId: ingredient.usedWipItemId || null,
+      quantity: ingredient.quantity,
+      unit: ingredient.unit,
+    });
+  }
+
+  return c.json({ success: true, message: '仕掛品レシピを作成しました' });
+});
+
+// レシピ削除
+app.delete('/:id', async (c) => {
+  const id = c.req.param('id');
+  const db = createDbClient(c.env);
+
+  await db.delete(recipes).where(eq(recipes.id, id));
+
+  return c.json({ success: true, message: 'レシピを削除しました' });
 });
 
 export default app;

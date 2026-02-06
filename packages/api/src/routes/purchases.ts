@@ -27,7 +27,7 @@ app.get('/', async (c) => {
       unitPrice: purchases.unitPrice,
       totalAmount: purchases.totalAmount,
       purchaseDate: purchases.purchaseDate,
-      supplier: purchases.supplier,
+      supplierId: purchases.supplierId,
     })
     .from(purchases)
     .leftJoin(stores, eq(purchases.storeId, stores.id))

@@ -9,7 +9,7 @@ interface Purchase {
   unitPrice: number;
   totalAmount: number;
   purchaseDate: string;
-  supplier: string | null;
+  supplierId: string | null;
 }
 
 interface PurchaseSummary {
@@ -109,7 +109,7 @@ export default function PurchaseList() {
                 <td>{purchase.quantity.toLocaleString()}</td>
                 <td>¥{purchase.unitPrice.toLocaleString()}</td>
                 <td className="amount">¥{purchase.totalAmount.toLocaleString()}</td>
-                <td>{purchase.supplier || '-'}</td>
+                <td>{purchase.supplierId || '-'}</td>
               </tr>
             ))}
           </tbody>

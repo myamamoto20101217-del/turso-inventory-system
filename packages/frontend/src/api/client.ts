@@ -47,6 +47,34 @@ class ApiClient {
   }
 
   /**
+   * 汎用GETリクエスト
+   */
+  async get(url: string, config?: any) {
+    return this.client.get(url, config);
+  }
+
+  /**
+   * 汎用POSTリクエスト
+   */
+  async post(url: string, data?: any, config?: any) {
+    return this.client.post(url, data, config);
+  }
+
+  /**
+   * 汎用PATCHリクエスト
+   */
+  async patch(url: string, data?: any, config?: any) {
+    return this.client.patch(url, data, config);
+  }
+
+  /**
+   * 汎用DELETEリクエスト
+   */
+  async delete(url: string, config?: any) {
+    return this.client.delete(url, config);
+  }
+
+  /**
    * 在庫一覧取得
    */
   async getInventory(storeId?: string) {
@@ -93,6 +121,14 @@ class ApiClient {
    */
   async getSalesSummary(params: { storeId?: string; startDate?: string; endDate?: string }) {
     const response = await this.client.get('/api/sales/summary', { params });
+    return response.data;
+  }
+
+  /**
+   * 店舗一覧取得
+   */
+  async getStores() {
+    const response = await this.client.get('/api/stores');
     return response.data;
   }
 }
