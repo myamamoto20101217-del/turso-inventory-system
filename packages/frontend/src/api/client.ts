@@ -47,6 +47,20 @@ class ApiClient {
   }
 
   /**
+   * 汎用GETリクエスト
+   */
+  async get(url: string, config?: any) {
+    return this.client.get(url, config);
+  }
+
+  /**
+   * 汎用POSTリクエスト
+   */
+  async post(url: string, data?: any, config?: any) {
+    return this.client.post(url, data, config);
+  }
+
+  /**
    * 在庫一覧取得
    */
   async getInventory(storeId?: string) {
