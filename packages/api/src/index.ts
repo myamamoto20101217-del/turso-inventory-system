@@ -11,6 +11,7 @@ import wasteRoutes from './routes/waste';
 import stocktakingsRoutes from './routes/stocktakings';
 import ordersRoutes from './routes/orders';
 import wipProductionsRoutes from './routes/wip-productions';
+import wipItemsRoutes from './routes/wip-items';
 import storesRoutes from './routes/stores';
 
 // Cloudflare Pages環境変数の型定義
@@ -68,6 +69,7 @@ app.route('/api/menus', menusRoutes);
 app.route('/api/purchases', purchasesRoutes);
 app.route('/api/waste', wasteRoutes);
 app.route('/api/stores', storesRoutes);
+app.route('/api/wip-items', wipItemsRoutes);
 app.route('/api/stocktakings', stocktakingsRoutes);
 app.route('/api/orders', ordersRoutes);
 app.route('/api/wip-productions', wipProductionsRoutes);

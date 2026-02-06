@@ -68,6 +68,13 @@ class ApiClient {
   }
 
   /**
+   * 汎用DELETEリクエスト
+   */
+  async delete(url: string, config?: any) {
+    return this.client.delete(url, config);
+  }
+
+  /**
    * 在庫一覧取得
    */
   async getInventory(storeId?: string) {
