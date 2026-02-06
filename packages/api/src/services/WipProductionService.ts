@@ -1,5 +1,5 @@
-import { eq, and } from 'drizzle-orm';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { eq, and, sql } from 'drizzle-orm';
+import type { DbClient } from '../db/client';
 import {
   wipProductions,
   wipInventory,
@@ -10,7 +10,7 @@ import {
 } from '../db/schema';
 
 export class WipProductionService {
-  constructor(private db: LibSQLDatabase) {}
+  constructor(private db: DbClient) {}
 
   /**
    * 仕掛品製造を記録
@@ -36,8 +36,8 @@ export class WipProductionService {
       wipItemId: data.wipItemId,
       quantity: data.quantity,
       unit: data.unit,
-      productionDate: Math.floor(productionDate.getTime() / 1000),
-      expiryDate: data.expiryDate ? Math.floor(data.expiryDate.getTime() / 1000) : undefined,
+      productionDate,
+      expiryDate: data.expiryDate,
       employeeId: data.employeeId,
       notes: data.notes,
     };
@@ -73,7 +73,7 @@ export class WipProductionService {
             .update(inventory)
             .set({
               quantity: newQuantity,
-              updatedAt: Math.floor(Date.now() / 1000),
+              updatedAt: sql`(unixepoch())`,
             })
             .where(eq(inventory.id, existingInventory[0].id));
         }
@@ -95,9 +95,9 @@ export class WipProductionService {
         .update(wipInventory)
         .set({
           quantity: existingWipInventory[0].quantity + data.quantity,
-          productionDate: Math.floor(productionDate.getTime() / 1000),
-          expiryDate: data.expiryDate ? Math.floor(data.expiryDate.getTime() / 1000) : undefined,
-          updatedAt: Math.floor(Date.now() / 1000),
+          productionDate,
+          expiryDate: data.expiryDate,
+          updatedAt: sql`(unixepoch())`,
         })
         .where(eq(wipInventory.id, existingWipInventory[0].id));
     } else {
@@ -107,8 +107,8 @@ export class WipProductionService {
         storeId: data.storeId,
         wipItemId: data.wipItemId,
         quantity: data.quantity,
-        productionDate: Math.floor(productionDate.getTime() / 1000),
-        expiryDate: data.expiryDate ? Math.floor(data.expiryDate.getTime() / 1000) : undefined,
+        productionDate,
+        expiryDate: data.expiryDate,
       });
     }
 

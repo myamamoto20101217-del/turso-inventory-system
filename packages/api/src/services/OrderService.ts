@@ -1,5 +1,5 @@
 import { eq, and, sql } from 'drizzle-orm';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { DbClient } from '../db/client';
 import {
   orders,
   orderDetails,
@@ -12,7 +12,7 @@ import {
 } from '../db/schema';
 
 export class OrderService {
-  constructor(private db: LibSQLDatabase) {}
+  constructor(private db: DbClient) {}
 
   /**
    * 発注を新規作成（DRAFT状態）
@@ -34,10 +34,8 @@ export class OrderService {
       orderNumber,
       storeId: data.storeId,
       supplierId: data.supplierId,
-      orderDate: Math.floor(orderDate.getTime() / 1000),
-      expectedDeliveryDate: data.expectedDeliveryDate
-        ? Math.floor(data.expectedDeliveryDate.getTime() / 1000)
-        : undefined,
+      orderDate,
+      expectedDeliveryDate: data.expectedDeliveryDate,
       status: 'DRAFT',
       isAutoOrder: false,
       employeeId: data.employeeId,
@@ -107,7 +105,7 @@ export class OrderService {
       .update(orders)
       .set({
         totalAmount,
-        updatedAt: Math.floor(Date.now() / 1000),
+        updatedAt: sql`(unixepoch())`,
       })
       .where(eq(orders.id, orderId));
   }
@@ -139,12 +137,12 @@ export class OrderService {
 
     if (storeId && status) {
       return query
-        .where(and(eq(orders.storeId, storeId), eq(orders.status, status)))
+        .where(and(eq(orders.storeId, storeId), eq(orders.status, status as any)))
         .orderBy(orders.orderDate);
     } else if (storeId) {
       return query.where(eq(orders.storeId, storeId)).orderBy(orders.orderDate);
     } else if (status) {
-      return query.where(eq(orders.status, status)).orderBy(orders.orderDate);
+      return query.where(eq(orders.status, status as any)).orderBy(orders.orderDate);
     }
 
     return query.orderBy(orders.orderDate);
@@ -293,7 +291,7 @@ export class OrderService {
         .update(orderDetails)
         .set({
           receivedQuantity: item.quantity,
-          updatedAt: Math.floor(Date.now() / 1000),
+          updatedAt: sql`(unixepoch())`,
         })
         .where(eq(orderDetails.id, item.detailId));
 
@@ -304,7 +302,7 @@ export class OrderService {
           .update(inventory)
           .set({
             quantity: sql`${inventory.quantity} + ${item.quantity}`,
-            updatedAt: Math.floor(Date.now() / 1000),
+            updatedAt: sql`(unixepoch())`,
           })
           .where(
             and(

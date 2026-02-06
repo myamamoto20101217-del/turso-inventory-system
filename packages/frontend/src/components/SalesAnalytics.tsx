@@ -105,15 +105,17 @@ export default function SalesAnalytics() {
         <div className="summary-cards">
           <div className="summary-card">
             <span className="label">総売上</span>
-            <span className="value">¥{summary.totalSales.toLocaleString()}</span>
+            <span className="value">¥{(summary.totalSales || 0).toLocaleString()}</span>
           </div>
           <div className="summary-card">
             <span className="label">注文件数</span>
-            <span className="value">{summary.orderCount}件</span>
+            <span className="value">{summary.orderCount || 0}件</span>
           </div>
           <div className="summary-card">
             <span className="label">平均客単価</span>
-            <span className="value">¥{Math.round(summary.averageOrderValue).toLocaleString()}</span>
+            <span className="value">
+              ¥{Math.round(summary.averageOrderValue || 0).toLocaleString()}
+            </span>
           </div>
         </div>
       )}

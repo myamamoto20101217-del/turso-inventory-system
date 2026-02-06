@@ -1,13 +1,13 @@
 import { Hono } from 'hono';
 import type { Bindings, Variables } from '../types';
 import { StocktakingService } from '../services/StocktakingService';
-import { getDb } from '../db';
+import { createDbClient } from '../db/client';
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // 棚卸一覧取得
 app.get('/', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new StocktakingService(db);
   const storeId = c.req.query('storeId');
 
@@ -18,7 +18,7 @@ app.get('/', async (c) => {
 
 // 棚卸詳細取得
 app.get('/:id', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new StocktakingService(db);
   const id = c.req.param('id');
 
@@ -33,7 +33,7 @@ app.get('/:id', async (c) => {
 
 // 棚卸差異分析取得
 app.get('/:id/analysis', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new StocktakingService(db);
   const id = c.req.param('id');
 
@@ -44,7 +44,7 @@ app.get('/:id/analysis', async (c) => {
 
 // 棚卸作成
 app.post('/', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new StocktakingService(db);
   const body = await c.req.json();
 
@@ -70,7 +70,7 @@ app.post('/', async (c) => {
 
 // 棚卸明細追加
 app.post('/:id/details', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new StocktakingService(db);
   const id = c.req.param('id');
   const body = await c.req.json();
@@ -100,7 +100,7 @@ app.post('/:id/details', async (c) => {
 
 // 棚卸確定
 app.post('/:id/confirm', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new StocktakingService(db);
   const id = c.req.param('id');
 

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { eq, and, sql } from 'drizzle-orm';
 import { createDbClient } from '../db/client';
-import { inventory, products, stores } from '../db/schema';
+import { inventory, products, stores, categories } from '../db/schema';
 import { authMiddleware } from '../middleware/auth';
 
 type Variables = {
@@ -15,15 +15,15 @@ type Variables = {
 const app = new Hono<{ Bindings: CloudflareBindings; Variables: Variables }>();
 
 /**
- * 在庫一覧取得
+ * 在庫一覧取得（材料ごとに集計）
  * GET /api/inventory?storeId=S001
  */
 app.get('/', authMiddleware, async (c) => {
-  const storeId = c.req.query('storeId');
+  const filterStoreId = c.req.query('storeId');
   const db = createDbClient(c.env);
 
   try {
-    // 在庫一覧を商品・店舗情報と結合して取得
+    // すべての在庫データを取得
     const inventoryList = await db
       .select({
         id: inventory.id,
@@ -31,6 +31,8 @@ app.get('/', authMiddleware, async (c) => {
         storeName: stores.name,
         productId: inventory.productId,
         productName: products.name,
+        categoryId: products.categoryId,
+        categoryName: categories.name,
         quantity: inventory.quantity,
         unit: products.unit,
         minStock: products.minStock,
@@ -40,13 +42,66 @@ app.get('/', authMiddleware, async (c) => {
       .from(inventory)
       .leftJoin(products, eq(inventory.productId, products.id))
       .leftJoin(stores, eq(inventory.storeId, stores.id))
-      .where(storeId ? eq(inventory.storeId, storeId) : undefined)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
       .orderBy(products.name);
+
+    // 材料ごとにグループ化
+    const groupedByProduct = inventoryList.reduce(
+      (acc, item) => {
+        if (!item.productId || !item.productName) return acc;
+
+        if (!acc[item.productId]) {
+          acc[item.productId] = {
+            productId: item.productId,
+            productName: item.productName,
+            categoryName: item.categoryName,
+            unit: item.unit,
+            minStock: item.minStock,
+            totalQuantity: 0,
+            isLowStock: false,
+            stores: [],
+          };
+        }
+
+        acc[item.productId].stores.push({
+          id: item.id,
+          storeId: item.storeId,
+          storeName: item.storeName,
+          quantity: item.quantity,
+          isLowStock: item.isLowStock,
+          updatedAt: item.updatedAt,
+        });
+
+        acc[item.productId].totalQuantity += item.quantity;
+        if (item.isLowStock) {
+          acc[item.productId].isLowStock = true;
+        }
+
+        return acc;
+      },
+      {} as Record<string, any>
+    );
+
+    // オブジェクトを配列に変換
+    let result = Object.values(groupedByProduct);
+
+    // 店舗フィルターを適用
+    if (filterStoreId) {
+      result = result
+        .map((product: any) => ({
+          ...product,
+          stores: product.stores.filter((store: any) => store.storeId === filterStoreId),
+          totalQuantity: product.stores
+            .filter((store: any) => store.storeId === filterStoreId)
+            .reduce((sum: number, store: any) => sum + store.quantity, 0),
+        }))
+        .filter((product: any) => product.stores.length > 0);
+    }
 
     return c.json({
       success: true,
-      data: inventoryList,
-      count: inventoryList.length,
+      data: result,
+      count: result.length,
     });
   } catch (error) {
     console.error('Failed to fetch inventory:', error);

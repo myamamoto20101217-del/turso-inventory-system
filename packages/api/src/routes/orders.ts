@@ -1,13 +1,13 @@
 import { Hono } from 'hono';
 import type { Bindings, Variables } from '../types';
 import { OrderService } from '../services/OrderService';
-import { getDb } from '../db';
+import { createDbClient } from '../db/client';
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // 発注一覧取得
 app.get('/', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new OrderService(db);
   const storeId = c.req.query('storeId');
   const status = c.req.query('status');
@@ -19,7 +19,7 @@ app.get('/', async (c) => {
 
 // 発注詳細取得
 app.get('/:id', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new OrderService(db);
   const id = c.req.param('id');
 
@@ -34,7 +34,7 @@ app.get('/:id', async (c) => {
 
 // 自動発注推奨リスト取得
 app.get('/recommendations/:storeId', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new OrderService(db);
   const storeId = c.req.param('storeId');
 
@@ -45,7 +45,7 @@ app.get('/recommendations/:storeId', async (c) => {
 
 // 発注作成
 app.post('/', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new OrderService(db);
   const body = await c.req.json();
 
@@ -84,7 +84,7 @@ app.post('/', async (c) => {
 
 // 推奨発注から発注作成
 app.post('/from-recommendation', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new OrderService(db);
   const body = await c.req.json();
 
@@ -101,7 +101,7 @@ app.post('/from-recommendation', async (c) => {
 
 // 発注明細追加
 app.post('/:id/details', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new OrderService(db);
   const id = c.req.param('id');
   const body = await c.req.json();
@@ -126,7 +126,7 @@ app.post('/:id/details', async (c) => {
 
 // 発注ステータス更新
 app.patch('/:id/status', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new OrderService(db);
   const id = c.req.param('id');
   const body = await c.req.json();
@@ -144,7 +144,7 @@ app.patch('/:id/status', async (c) => {
 
 // 納品確認
 app.post('/:id/delivery', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new OrderService(db);
   const id = c.req.param('id');
   const body = await c.req.json();

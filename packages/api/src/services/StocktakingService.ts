@@ -1,5 +1,5 @@
-import { eq, and } from 'drizzle-orm';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { eq, and, sql } from 'drizzle-orm';
+import type { DbClient } from '../db/client';
 import {
   stocktakings,
   stocktakingDetails,
@@ -14,7 +14,7 @@ import {
 } from '../db/schema';
 
 export class StocktakingService {
-  constructor(private db: LibSQLDatabase) {}
+  constructor(private db: DbClient) {}
 
   /**
    * 棚卸を新規作成（DRAFT状態）
@@ -30,7 +30,7 @@ export class StocktakingService {
     const newStocktaking: NewStocktaking = {
       id,
       storeId: data.storeId,
-      stocktakingDate: Math.floor(stocktakingDate.getTime() / 1000),
+      stocktakingDate,
       status: 'DRAFT',
       employeeId: data.employeeId,
     };
@@ -117,7 +117,7 @@ export class StocktakingService {
           .update(inventory)
           .set({
             quantity: detail.actualQuantity,
-            updatedAt: Math.floor(Date.now() / 1000),
+            updatedAt: sql`(unixepoch())`,
           })
           .where(
             and(
@@ -131,7 +131,7 @@ export class StocktakingService {
           .update(wipInventory)
           .set({
             quantity: detail.actualQuantity,
-            updatedAt: Math.floor(Date.now() / 1000),
+            updatedAt: sql`(unixepoch())`,
           })
           .where(
             and(
@@ -147,8 +147,8 @@ export class StocktakingService {
       .update(stocktakings)
       .set({
         status: 'CONFIRMED',
-        confirmedAt: Math.floor(Date.now() / 1000),
-        updatedAt: Math.floor(Date.now() / 1000),
+        confirmedAt: new Date(),
+        updatedAt: sql`(unixepoch())`,
       })
       .where(eq(stocktakings.id, stocktakingId));
   }

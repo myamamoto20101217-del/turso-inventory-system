@@ -1,13 +1,13 @@
 import { Hono } from 'hono';
 import type { Bindings, Variables } from '../types';
 import { WipProductionService } from '../services/WipProductionService';
-import { getDb } from '../db';
+import { createDbClient } from '../db/client';
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // 製造履歴取得
 app.get('/', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new WipProductionService(db);
   const storeId = c.req.query('storeId');
   const wipItemId = c.req.query('wipItemId');
@@ -19,7 +19,7 @@ app.get('/', async (c) => {
 
 // 必要材料チェック
 app.post('/check-ingredients', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new WipProductionService(db);
   const body = await c.req.json();
 
@@ -36,7 +36,7 @@ app.post('/check-ingredients', async (c) => {
 
 // 仕掛品製造記録
 app.post('/', async (c) => {
-  const db = getDb(c.env);
+  const db = createDbClient(c.env) as any;
   const service = new WipProductionService(db);
   const body = await c.req.json();
 
