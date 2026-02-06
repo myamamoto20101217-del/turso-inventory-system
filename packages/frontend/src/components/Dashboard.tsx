@@ -29,13 +29,13 @@ export default function Dashboard() {
   };
 
   const tabs = [
-    { id: 'inventory' as TabType, label: '在庫管理', icon: MdInventory },
-    { id: 'recipes' as TabType, label: 'レシピ', icon: MdMenuBook },
-    { id: 'sales' as TabType, label: '売上分析', icon: MdBarChart },
-    { id: 'purchases' as TabType, label: '仕入れ', icon: MdShoppingCart },
-    { id: 'waste' as TabType, label: '廃棄', icon: MdDelete },
-    { id: 'stocktaking' as TabType, label: '棚卸', icon: MdChecklist },
-    { id: 'orders' as TabType, label: '発注', icon: MdShoppingBag },
+    { id: 'inventory' as TabType, label: '在庫管理', icon: MdInventory, color: 'icon-green' },
+    { id: 'recipes' as TabType, label: 'レシピ', icon: MdMenuBook, color: 'icon-orange' },
+    { id: 'sales' as TabType, label: '売上分析', icon: MdBarChart, color: 'icon-blue' },
+    { id: 'purchases' as TabType, label: '仕入れ', icon: MdShoppingCart, color: 'icon-purple' },
+    { id: 'waste' as TabType, label: '廃棄', icon: MdDelete, color: 'icon-red' },
+    { id: 'stocktaking' as TabType, label: '棚卸', icon: MdChecklist, color: 'icon-teal' },
+    { id: 'orders' as TabType, label: '発注', icon: MdShoppingBag, color: 'icon-indigo' },
   ];
 
   return (
@@ -59,7 +59,7 @@ export default function Dashboard() {
               className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
-              <IconComponent className="tab-icon" />
+              <IconComponent className={`tab-icon ${tab.color}`} />
               <span className="tab-label">{tab.label}</span>
             </button>
           );

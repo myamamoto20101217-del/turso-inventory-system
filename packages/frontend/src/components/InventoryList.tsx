@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -283,10 +283,9 @@ export default function InventoryList() {
               </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <>
+                <React.Fragment key={row.id}>
                   {/* 親行：材料の集計 */}
                   <tr
-                    key={row.id}
                     className={`product-row ${row.original.isLowStock ? 'low-stock' : ''} ${
                       row.getIsExpanded() ? 'expanded' : ''
                     }`}
@@ -324,7 +323,7 @@ export default function InventoryList() {
                         </td>
                       </tr>
                     ))}
-                </>
+                </React.Fragment>
               ))
             )}
           </tbody>

@@ -42,7 +42,7 @@ app.use('*', logger());
 app.use(
   '/api/*',
   cors({
-    origin: ['http://localhost:5173', 'https://your-frontend-domain.com'],
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://your-frontend-domain.com'],
     credentials: true,
   })
 );
