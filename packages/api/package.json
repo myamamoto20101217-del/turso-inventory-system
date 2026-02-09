@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "bun --hot --env-file=.dev.vars src/index.ts",
     "dev:wrangler": "wrangler pages dev --compatibility-date=2024-01-01 --port 8787",
-    "build": "bun build src/index.ts --outfile dist/_worker.js --target bun",
+    "build": "node build.mjs",
     "deploy": "wrangler pages deploy",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
