@@ -1,64 +1,43 @@
-import { Context, Next } from 'hono';
-import * as admin from 'firebase-admin';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
+import type { Context, Next } from 'hono';
+
+// Firebase Auth公開鍵のURL
+const FIREBASE_JWKS_URL =
+  'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
+
+// Firebase Project ID
+const FIREBASE_PROJECT_ID = 'inventory-management-85426';
+
+// JWKSの取得（キャッシュされる）
+const JWKS = createRemoteJWKSet(new URL(FIREBASE_JWKS_URL));
 
 /**
- * Firebase Admin SDKの初期化
- * Cloudflare Pagesの環境変数からサービスアカウント情報を取得
- */
-function initializeFirebase(env: any) {
-  if (!admin.apps.length) {
-    try {
-      const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
-
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
-    } catch (error) {
-      console.warn('Firebase initialization failed:', error);
-      return null;
-    }
-  }
-  return admin;
-}
-
-/**
- * Firebase認証Middleware
- * リクエストヘッダーからIDトークンを取得・検証
- * 開発環境ではスキップ可能（DEV_MODE=true）
+ * Firebase Auth IDトークン検証ミドルウェア
+ *
+ * Authorization: Bearer <token> ヘッダーからトークンを取得し、
+ * Firebaseの公開鍵で署名を検証します。
  */
 export async function authMiddleware(c: Context, next: Next) {
-  // 開発モード: 認証をスキップ
-  if (process.env.DEV_MODE === 'true') {
-    c.set('user', {
-      uid: 'dev-user',
-      email: 'dev@example.com',
-      emailVerified: true,
-    });
-    await next();
-    return;
-  }
-
   const authHeader = c.req.header('Authorization');
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return c.json({ error: 'Unauthorized: No token provided' }, 401);
   }
 
-  const token = authHeader.substring(7);
+  const token = authHeader.substring(7); // "Bearer " を除去
 
   try {
-    const firebase = initializeFirebase(c.env);
-    if (!firebase) {
-      return c.json({ error: 'Firebase not configured' }, 500);
-    }
+    // トークンを検証
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`,
+      audience: FIREBASE_PROJECT_ID,
+    });
 
-    const decodedToken = await firebase.auth().verifyIdToken(token);
-
-    // ユーザー情報をコンテキストに保存
+    // ユーザー情報をコンテキストに設定
     c.set('user', {
-      uid: decodedToken.uid,
-      email: decodedToken.email,
-      emailVerified: decodedToken.email_verified,
+      uid: payload.sub as string,
+      email: payload.email as string | undefined,
+      emailVerified: payload.email_verified as boolean,
     });
 
     await next();
@@ -66,6 +45,42 @@ export async function authMiddleware(c: Context, next: Next) {
     console.error('Token verification failed:', error);
     return c.json({ error: 'Unauthorized: Invalid token' }, 401);
   }
+}
+
+/**
+ * オプショナル認証ミドルウェア
+ *
+ * トークンがある場合は検証し、ない場合はスキップします。
+ * 公開エンドポイントで使用可能です。
+ */
+export async function optionalAuth(c: Context, next: Next) {
+  const authHeader = c.req.header('Authorization');
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // トークンがない場合はスキップ
+    await next();
+    return;
+  }
+
+  const token = authHeader.substring(7);
+
+  try {
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`,
+      audience: FIREBASE_PROJECT_ID,
+    });
+
+    c.set('user', {
+      uid: payload.sub as string,
+      email: payload.email as string | undefined,
+      emailVerified: payload.email_verified as boolean,
+    });
+  } catch (error) {
+    // トークンが無効でもエラーにしない
+    console.warn('Optional auth: Invalid token provided');
+  }
+
+  await next();
 }
 
 /**
