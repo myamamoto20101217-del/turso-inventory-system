@@ -45,3 +45,8 @@ drizzle/
 # Firebase
 firebase-adminsdk-*.json
 serviceAccountKey.json
+*firebase-adminsdk*.json
+
+# Secrets & Credentials
+secrets/
+*.txt

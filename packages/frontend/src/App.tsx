@@ -6,10 +6,10 @@ import './App.css';
 export default function App() {
   const { user, loading } = useAuth();
 
-  // 開発モード: 認証をスキップしてダッシュボードを表示
-  const isDev = import.meta.env.DEV;
+  // 認証スキップモード（環境変数で制御）
+  const skipAuth = import.meta.env.VITE_SKIP_AUTH === 'true';
 
-  if (loading && !isDev) {
+  if (loading && !skipAuth) {
     return (
       <div className="loading-screen">
         <div className="spinner"></div>
@@ -18,6 +18,6 @@ export default function App() {
     );
   }
 
-  // 開発モードまたはログイン済みの場合はダッシュボードを表示
-  return <div className="app">{isDev || user ? <Dashboard /> : <LoginForm />}</div>;
+  // 認証スキップモードまたはログイン済みの場合はダッシュボードを表示
+  return <div className="app">{skipAuth || user ? <Dashboard /> : <LoginForm />}</div>;
 }
