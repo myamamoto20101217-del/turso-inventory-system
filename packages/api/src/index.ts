@@ -40,12 +40,20 @@ app.use('*', logger());
 app.use(
   '/api/*',
   cors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'https://inventory-frontend-8of.pages.dev',
-      'https://64b1b7b8.inventory-frontend-8of.pages.dev',
-    ],
+    origin: (origin) => {
+      // 許可するオリジンのパターン
+      const allowedPatterns = [
+        /^http:\/\/localhost:\d+$/,
+        /^https:\/\/.*\.inventory-frontend-8of\.pages\.dev$/,
+        /^https:\/\/inventory-frontend-8of\.pages\.dev$/,
+      ];
+
+      // いずれかのパターンにマッチすればオリジンを返す
+      if (allowedPatterns.some((pattern) => pattern.test(origin))) {
+        return origin;
+      }
+      return false;
+    },
     credentials: true,
   })
 );

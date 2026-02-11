@@ -34,6 +34,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy packages/api/dist --project-name=inventory-api
+          workingDirectory: "."
 
   deploy-frontend:
     name: Deploy Frontend to Cloudflare Pages
@@ -69,3 +70,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy packages/frontend/dist --project-name=inventory-frontend
+          workingDirectory: "."
